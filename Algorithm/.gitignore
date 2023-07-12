@@ -1,0 +1,14 @@
+﻿# pycharm
+.idea/
+
+# build
+__pycache__
+
+# packets
+venv_rtx3060
+venv*
+lib/__pycache__
+
+
+
+
