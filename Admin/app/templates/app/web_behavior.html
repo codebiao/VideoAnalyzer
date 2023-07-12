@@ -1,0 +1,105 @@
+{% extends "app/base_site.html" %}
+
+{% block title %} 行为算法 {% endblock title %}
+
+{% block stylesheets %}
+  {{ block.super }}
+{% endblock stylesheets %}
+
+{% block content %}
+
+<style>
+    .behavior-remark {
+        float: left;
+        width: 100%;
+        max-width: 200px;
+        height: 100%;
+        font-size: 14px;
+        color: #333;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        /*white-space: nowrap;*/
+        /* text-align: center; */
+    }
+</style>
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="page-title">
+        <div class="title_left">
+          <h3>行为算法</h3>
+        </div>
+      </div>
+
+      <div class="clearfix"></div>
+
+
+      <div class="row">
+
+      <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>管理</h2>
+          <div class="clearfix"></div>
+        </div>
+
+        <div class="x_content">
+
+          <p><code>说明</code> 系统支持的行为算法</p>
+
+          <div class="table-responsive">
+            <table class="table table-striped jambo_table bulk_action">
+              <thead>
+                <tr class="headings">
+                  <th class="column-title">序号 </th>
+                  <th class="column-title">编号 </th>
+                  <th class="column-title">名称 </th>
+                  <th class="column-title">检测间隔（秒） </th>
+                  <th class="column-title">灵敏度 </th>
+                  <th class="column-title">阈值 </th>
+                  <th class="column-title last" style="">备注</th>
+                </tr>
+              </thead>
+
+              <tbody>
+              {%  for d  in data %}
+                <tr class="even pointer">
+                  <td>{{forloop.counter}}</td>
+                  <td>{{ d.code }}</td>
+                  <td>{{ d.name }}</td>
+                  <td>{{ d.interval }}</td>
+                  <td>{{ d.sensitivity }}</td>
+                  <td>{{ d.overlap_thresh }}</td>
+                  <td><span class="behavior-remark">{{ d.remark }}</span></td>
+                </tr>
+              {% endfor %}
+
+              </tbody>
+            </table>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+      </div>
+    </div>
+  </div>
+
+    <script>
+function reload(){
+    window.location.reload();
+}
+function del(code){
+    alert("del")
+    alert(code)
+}
+</script>
+
+
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super }}
+{% endblock javascripts %}
+

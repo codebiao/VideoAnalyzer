@@ -1,0 +1,179 @@
+{% extends "app/base_site.html" %}
+
+{% block title %} 视频流 {% endblock title %}
+
+{% block stylesheets %}
+  {{ block.super }}
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="page-title">
+        <div class="title_left">
+          <h3>视频流</h3>
+        </div>
+      </div>
+
+      <div class="clearfix"></div>
+
+
+      <div class="row">
+
+      <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>管理</h2>
+
+        <div class="pull-right" >
+          <button type="button" onclick="cameraAdd()"  class="btn btn-success btn-sm">添加摄像头</button>
+          <button type="button" onclick="allCameraPushStream()"  class="btn btn-success btn-sm">摄像头重启推流</button>
+          <button type="button" onclick="reload()"  class="btn btn-success btn-sm">刷新</button>
+        </div>
+
+          <div class="clearfix"></div>
+        </div>
+
+        <div class="x_content">
+
+          <p>
+              <code>msg</code>
+              <span id="sun-span-loading" ><img class="sun-img-loading" src="/static/images/load.gif" alt="loading">加载中</span>
+          </p>
+
+          <div class="table-responsive">
+            <table class="table table-striped jambo_table bulk_action">
+              <thead>
+                <tr class="headings">
+                  <th class="column-title"># </th>
+                  <th class="column-title">来源 </th>
+                  <th class="column-title">视频流 </th>
+                  <th class="column-title">状态 </th>
+                  <th class="column-title">在线人数 </th>
+                  <th class="column-title">入口带宽 </th>
+                  <th class="column-title">视频信息 </th>
+                  <th class="column-title">音频信息 </th>
+                  <th class="column-title last"><span class="nobr">操作</span>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody id="data">
+              </tbody>
+            </table>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super }}
+
+<script>
+
+
+
+
+    let eleData = $("#data");
+    let eleSunSpanLoading = $("#sun-span-loading");
+
+    function reload(){
+        window.location.reload();
+    }
+    function cameraAdd(){
+        window.location.href = "/camera/add"
+    }
+    function allCameraPushStream(){
+        $.ajax({
+               url: '/allCameraPushStream',
+               type: "get",
+               async: true,
+               data: {},
+               dataType: "json",
+               timeout: "3000",
+               error: function () {
+                   eleSunSpanLoading.hide();
+                   myAlert("网络异常，请确定网络正常！","error");
+               },
+               success: function (res) {
+                   eleSunSpanLoading.hide();
+                   if(1000 === res.code){
+
+                   }else{
+                        myAlert(res.msg,"error");
+                   }
+               }
+            });
+
+    }
+    function dataUpdater() {
+        eleSunSpanLoading.show();
+        $.ajax({
+               url: '/getStreams',
+               type: "get",
+               async: true,
+               data: {},
+               dataType: "json",
+               timeout: "3000",
+               error: function () {
+                   eleSunSpanLoading.hide();
+                   myAlert("网络异常，请确定网络正常！","error");
+               },
+               success: function (res) {
+                   eleSunSpanLoading.hide();
+                   if(1000 === res.code){
+                       eleData.html("");
+                       let data = res.data;
+                       let data_length = data.length;
+                       let item_html = "";
+
+                       if(0===data_length){
+                          item_html += "<tr class=\"even pointer\"><td colspan='9'>暂无数据</td></tr>";
+                       }else{
+                            for (let i = 0; i < data_length; i++) {
+                               let d = data[i];
+                               item_html += "<tr class=\"even pointer\">";
+                               item_html += "<td>"+i.toString()+"</td>";
+                               item_html += "<td>"+d["ori"]+"</td>";
+                               item_html += "<td>"+d["app"]+"/"+d["name"]+"</td>";
+                               if(d["active"]){
+                                   item_html += "<td><span class='sun-state-success'>在线</span></td>";
+                               }else{
+                                   item_html += "<td><span class='sun-state-error'>离线</span></td>";
+                                }
+                               item_html += "<td>"+d["clients"]+"</td>";
+                               item_html += "<td>"+d["produce_speed"]+"</td>";
+                               item_html += "<td>"+d["video"]+"</td>";
+                               item_html += "<td>"+d["audio"]+"</td>";
+                               item_html += "<td><a class='sun-a-label'  href=\"/stream/play?app="+d["app"]+"&name="+d["name"]+"\" >预览</a></td>";
+                               item_html += "</tr>";
+                           }
+                        }
+                        eleData.append(item_html);
+
+                        //setTimeout(function () {dataUpdater();}, 6000);
+
+                   }else{
+                        myAlert(res.msg,"error");
+                   }
+               }
+            });
+
+    }
+    window.onload = function (){
+        dataUpdater();
+    };
+
+
+</script>
+{% endblock javascripts %}
+

@@ -1,0 +1,222 @@
+{% extends "app/base_site.html" %}
+
+{% block title %} 摄像头 {% endblock title %}
+
+
+
+{% block content %}
+
+<style>
+    #flv-player{
+        width: 100%;
+        max-height: 250px;
+
+    }
+    #flv-player:focus {
+        outline: -webkit-focus-ring-color auto 0px;
+    }
+
+</style>
+
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="page-title">
+        <div class="title_left">
+          <h3>Form Validation</h3>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Form validation <small>sub title</small></h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+              <form class="form-horizontal form-label-left" action="/video/{{handle}}" method="post" novalidate>
+                   {% if msg %}
+                        <p><code>{{ msg }}</code></p>
+                   {% endif %}
+
+                <div class="item form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">名称 <span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-12">
+                    <input id="name" class="form-control col-md-7 col-xs-12" name="name" value="{{ video.name }}"  required="required" type="text">
+                  </div>
+                </div>
+
+
+                <div class="item form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="website">视频流名称 <span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-12">
+                    <input type="text" onfocus="stream_name_change()" onblur="stream_name_change()" id="stream_name" name="stream_name" value="{{ video.stream_name }}" required="required"  class="form-control col-md-7 col-xs-12">
+                  </div>
+                </div>
+
+
+               <div class="item form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12" ></label>
+                  <div class="col-md-6 col-sm-6 col-xs-12">
+
+
+                      <div>
+                          <span>HTTP-FLV 视频流地址：</span>
+                          <a id="flv_stream_path"  style="line-height: 25px;"></a>
+                      </div>
+
+                      <div>
+                          <span>HTTP-HLS 视频流地址：</span>
+                          <a id="hls_stream_path"  style="line-height: 25px;"></a>
+                      </div>
+
+                      <div>
+                          <span>RTMP 视频流地址：</span>
+                          <a id="rtmp_stream_path" style="line-height: 25px;margin-left: 23px;"></a>
+                      </div>
+
+                  </div>
+                </div>
+
+                <div class="item form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="palyer">实时调阅
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-12">
+                      <div>
+                        <video id="flv-player" poster="/static/images/media.jpg" controls autoplay>
+                            Your browser is too old which doesn't support HTML5 video.
+                        </video>
+                      </div>
+                      <div>
+                          <a href="javascript:play()" class="btn btn-dark btn-xs"><i id="play-icon" class="fa fa-play"></i> 播放 </a>
+                          <a href="javascript:stop()" class="btn btn-dark btn-xs"><i id="stop-icon" class="fa fa-stop"></i> 暂停 </a>
+                      </div>
+                  </div>
+                </div>
+
+                <div class="item form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12" for="textarea">备注 <span class="required">*</span>
+                  </label>
+                  <div class="col-md-6 col-sm-6 col-xs-12">
+                    <textarea id="remark" required="required" name="remark" class="form-control col-md-7 col-xs-12">{{ video.remark }}</textarea>
+                  </div>
+                </div>
+                <div class="ln_solid"></div>
+                <div class="form-group">
+                  <div class="col-md-6 col-md-offset-3">
+                      <button type="submit" class="btn btn-success">提交</button>
+                      <button type="button" onclick="window.history.go(-1)" class="btn btn-primary">返回</button>
+
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super }}
+
+<script src="/static/vendors/validator/validator.js"></script>
+<script src="/static/lib/flv/flv.min.js"></script>
+
+<script>
+    let rtmpUrl = '{{ conf.rtmpUrl }}';
+    let httpUrl = '{{ conf.httpUrl }}';
+
+    let eleStreamName = document.getElementById('stream_name');
+    let eleRtmpStreamPath = document.getElementById('rtmp_stream_path');
+    let eleFlvStreamPath = document.getElementById('flv_stream_path');
+    let eleHlsStreamPath = document.getElementById('hls_stream_path');
+
+    function stream_name_change(){
+        let stream_name = eleStreamName.value;
+        let rtmp_stream_path = rtmpUrl;
+        let flv_stream_path = httpUrl;
+        let hls_stream_path = httpUrl;
+
+        if(stream_name){
+            rtmp_stream_path += "/live/" + stream_name;
+            flv_stream_path += "/live/" + stream_name+".flv";
+            hls_stream_path += "/live/" + stream_name+".m3u8";
+        }
+        eleRtmpStreamPath.innerText = rtmp_stream_path;
+        eleFlvStreamPath.innerText = flv_stream_path;
+        eleHlsStreamPath.innerText = hls_stream_path;
+    }
+
+    stream_name_change();
+
+
+    let elePlayIcon = $("#play-icon");
+
+    function play(){
+        if(!flvjs.isSupported()){
+            alert("浏览器不支持flvjs！");
+            return;
+        }
+        let flv_url = eleFlvStreamPath.innerText;
+        if(!flv_url.endsWith(".flv")){
+            alert("视频流地址不合法！");
+            return;
+        }
+        elePlayIcon.removeClass("fa-play");
+        elePlayIcon.addClass("fa-pause");
+
+        let mediaDataSource = {
+            type: 'flv',
+            enableStashBuffer:true,
+            isLive:true,
+            withCredentials:false,
+            hasAudio:true,
+            hasVideo:true,
+            url:flv_url
+        };
+        console.log('MediaDataSource', mediaDataSource);
+
+        let eleFlvPlayer= document.getElementById("flv-player");
+        //eleFlvPlayer.setAttribute('poster',"/static/images/media.jpg")
+
+        if (typeof player !== "undefined") {
+            if (player != null) {
+                player.unload();
+                player.detachMediaElement();
+                player.destroy();
+                player = null;
+            }
+        }
+        player = flvjs.createPlayer(mediaDataSource, {
+            enableWorker: false,
+            lazyLoadMaxDuration: 3 * 60,
+            seekType: 'range',
+        });
+        player.attachMediaElement(eleFlvPlayer);
+        player.load();
+        player.play();
+    }
+    function stop(){
+        if (typeof player === "undefined" || player === null) {
+            console.log("no player");
+            return;
+        }
+
+        elePlayIcon.removeClass("fa-pause");
+        elePlayIcon.addClass("fa-play");
+
+        player.pause();
+        player.unload();
+        player.detachMediaElement();
+        player.destroy();
+        player = null;
+    }
+</script>
+
+{% endblock javascripts %}

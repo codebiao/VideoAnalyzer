@@ -1,0 +1,436 @@
+{% extends "app/base_site.html" %}
+
+{% block title %} 布控视频流 {% endblock title %}
+
+{% block stylesheets %}
+  {{ block.super }}
+{% endblock stylesheets %}
+
+{% block content %}
+<style>
+    #flv-player{
+        /*background-color: rgba(0,0,00,0.6);*/
+        width: 100%;
+        height: 100%;
+        max-height: 520px;
+        /*object-fit: fill;*/
+        border-radius: 5px;
+        border: 1px solid #f0f0f0;
+
+    }
+    #flv-player:focus {
+        outline: -webkit-focus-ring-color auto 0px;
+    }
+
+</style>
+<script>
+    let streamCodeDict = {};
+    let streamCode;
+
+    let behaviorCodeDict = {};
+    let behaviorCode;
+</script>
+
+  <div class="right_col" role="main">
+    <div class="">
+      <div class="page-title">
+        <div class="title_left">
+          <h3>布控视频流</h3>
+        </div>
+      </div>
+
+      <div class="clearfix"></div>
+
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>{% ifequal handle 'add' %}添加{% else %}编辑{% endifequal %}</h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+              <div class="col-md-8 col-sm-8 col-xs-12">
+                <div class="product-image">
+                   <video id="flv-player"  controls autoplay>
+                        Your browser is too old which doesn't support HTML5 video.
+                    </video>
+                </div>
+              </div>
+
+              <div class="col-md-4 col-sm-4 col-xs-12" >
+
+             <div class="form-horizontal form-label-left">
+
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12">布控编号</label>
+                      <div class="col-md-9 col-sm-9 col-xs-12">
+                          <span style="height: 34px;line-height: 34px;padding: 6px 0;">{{ control.code }}</span>
+                      </div>
+                    </div>
+
+                <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12">选择视频流</label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                     {% ifequal handle 'add' %}
+                          <select id="select-stream" class="select2_single form-control" required="required" >
+                              {% ifequal streams|length 0 %}
+                                  <option value="-1">暂无视频流</option>
+                              {% else %}
+                                  <option value="0">请选择视频流</option>
+
+                                {% for stream in streams %}
+                                    <script>
+                                        streamCode = '{{ stream.code }}';
+                                        streamCodeDict[streamCode] = {
+                                            'code':streamCode,
+                                            "app":'{{ stream.app }}',
+                                            "name":'{{ stream.name }}',
+                                            "video":'{{ stream.video }}',
+                                            "audio":'{{ stream.audio }}',
+                                            "flvUrl":'{{ stream.flvUrl }}',
+                                        }
+                                    </script>
+                                    <option value="{{ stream.code }}">{{ stream.app }}/{{ stream.name }}</option>
+                                {% endfor %}
+                              {% endifequal %}
+                          </select>
+                     {% else %}
+                          <select id="select-stream"  disabled="disabled"  class="select2_single form-control" >
+                            <option selected value="{{ control.stream_app }}_{{ control.stream_name }}">{{ control.stream_app }}/{{ control.stream_name }}</option>
+                          </select>
+                     {% endifequal %}
+                   </div>
+               </div>
+
+
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">视频信息</label>
+                  <div class="col-md-9 col-sm-9 col-xs-12">
+                         <input id="video"  type="text" disabled="disabled" value="{{ control.stream_video }}" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">音频信息</label>
+                  <div class="col-md-9 col-sm-9 col-xs-12">
+                       <input id="audio"  type="text" disabled="disabled" value="{{ control.stream_audio }}" class="form-control">
+                  </div>
+                </div>
+
+
+
+                <div class="form-group">
+                  <label class="control-label col-md-3 col-sm-3 col-xs-12">播放地址</label>
+                  <div class="col-md-9 col-sm-9 col-xs-12">
+                       <input id="flvUrl"  type="url" disabled="disabled" value="{{ control_stream_flvUrl }}" class="form-control">
+                  </div>
+                </div>
+
+                    <div class="form-group">
+                      <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+                            <button id="play" type="button" class="btn btn-default btn-sm"><i class="fa fa-play"></i> 播放视频 </button>
+                            <button id="stop" type="button" class="btn btn-default btn-sm"><i class="fa fa-stop"></i> 停止播放 </button>
+                      </div>
+                    </div>
+                 <div class="ln_solid"></div>
+
+
+                      <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12">选择算法
+                      </label>
+
+                      <div class="col-md-9 col-sm-9 col-xs-12">
+
+                        <select id="select-behavior"  class="select2_single form-control" required="required"  tabindex="-1">
+                            <option value="0">请选择算法</option>
+
+                            {% for behavior in behaviors %}
+
+                               <script>
+                                    behaviorCode = '{{ behavior.code }}';
+                                    behaviorCodeDict[behaviorCode] = {
+                                        "code":behaviorCode,
+                                        "name":'{{ behavior.name }}',
+                                    }
+                                </script>
+
+                                <option {% ifequal behavior.code control.behavior_code %} selected {% endifequal %} value="{{ behavior.code }}">{{ behavior.name }}</option>
+                            {% endfor %}
+                        </select>
+
+
+                      </div>
+                    </div>
+
+
+                   <div class="form-group">
+                      <label class="col-md-3 col-sm-3 col-xs-12 control-label">是否推流
+                      </label>
+                      <div class="col-md-9 col-sm-9 col-xs-12">
+
+                        <div class="radio">
+                          <label>
+                            <input type="radio" {% ifequal control.push_stream 0 %} checked="checked" {% endifequal %} value="0" name="push-stream"> 算法处理的视频不推流
+                          </label>
+                        </div>
+
+                        <div class="radio">
+                          <label>
+                            <input type="radio" {% ifequal control.push_stream 1 %} checked="checked" {% endifequal %} value="1" name="push-stream"> 算法处理的视频推流
+                          </label>
+                        </div>
+
+                      </div>
+                    </div>
+
+
+                     <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="textarea">备注
+                      </label>
+                      <div class="col-md-9 col-sm-9 col-xs-12">
+                        <textarea id="remark" required="required" name="textarea" class="form-control col-md-7 col-xs-12">{{ control.remark }}</textarea>
+
+                      </div>
+                    </div>
+
+
+                    <div class="ln_solid"></div>
+                    <div class="form-group">
+                      <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+                          <button id="control-handle" type="button" class="btn btn-success btn-sm">同步数据</button>
+                          <button id="analy-video-add" type="button" class="btn btn-dark btn-sm">布控</button>
+                          <button id="analy-video-cancel" type="button" class="btn btn-dark btn-sm">取消布控</button>
+
+                      </div>
+                    </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super }}
+
+<script src="/static/lib/flv/flv.min.js"></script>
+<script>
+
+    let controlCode= '{{ control.code }}';// 布控编号
+    let handle = '{{ handle }}';// 操作类型 add 或 edit
+
+    let eleFlvPlayer= document.getElementById("flv-player");
+    let eleSelectStream = $("#select-stream");// select  选择视频流
+    let eleFlvUrl= $("#flvUrl");// input
+    let eleVideo = $("#video");// input
+    let eleAudio = $("#audio");// input
+    let eleBtnPlay = $("#play");//button
+    let eleBtnStop = $("#stop");//button
+
+    let eleSelectBehavior = $("#select-behavior");// select 选择算法
+    let elePushStream = $('input[type=radio][name=push-stream]');//radio
+    let pushStream = $('input[type=radio][name=push-stream]:checked').val();
+    let eleTextareaRemark = $("#remark");// textarea
+
+    let eleBtnControlHandle = $("#control-handle");//button 更新数据
+    let eleBtnAnalyVideoAdd = $("#analy-video-add");//button 布控
+    let eleBtnAnalyVideoCancel = $("#analy-video-cancel");//button 布控取消
+
+
+    eleSelectStream.change(function () {
+        streamCode = $(this).val();
+        let stream = streamCodeDict[streamCode];
+        if (stream) {
+            let flvUrl = stream["flvUrl"]
+            eleFlvUrl.val(flvUrl)
+            eleVideo.val(stream["video"])
+            eleAudio.val(stream["audio"])
+
+            play(flvUrl);
+        }else{
+            eleFlvUrl.val("")
+            eleVideo.val("")
+            eleAudio.val("")
+            stop();
+
+        }
+    });
+    eleSelectBehavior.change(function () {
+        behaviorCode = $(this).val();
+
+        let behavior = behaviorCodeDict[behaviorCode];
+
+        console.log(behaviorCode,behavior);
+    });
+
+    eleBtnPlay.click(function () {
+       play(eleFlvUrl.val());
+    });
+    eleBtnStop.click(function (){
+        stop();
+    });
+
+    elePushStream.change(function () {
+        pushStream = $(this).val();
+    });
+
+    eleBtnControlHandle.click(function () {// 添加或更新
+        streamCode = eleSelectStream.val().trim();//typeof string
+        if(streamCode==="-1"){
+            myAlert("暂无视频流","error");
+            return;
+        }else if(streamCode==="0"){
+            myAlert("请选择视频流","error");
+            return;
+        }
+
+        behaviorCode = eleSelectBehavior.val().trim();//typeof string
+        if(behaviorCode==="0"){
+            myAlert("请选择算法","error");
+            return;
+        }
+
+
+        let data = {
+            "controlCode":controlCode,
+            "behaviorCode":behaviorCode,
+            "pushStream":pushStream
+        }
+        let handleUrl;
+        if("add" === handle){
+            handleUrl = "/controlAdd";
+            let stream = streamCodeDict[streamCode];
+            if (stream){
+                data["streamApp"] = stream["app"]
+                data["streamName"] = stream["name"]
+                data["streamVideo"] = stream["video"]
+                data["streamAudio"] = stream["audio"]
+            }else{
+                return;
+            }
+        }else if("edit" === handle){
+            handleUrl = "/controlEdit";
+        }else{
+            return;
+        }
+
+        data["remark"] = eleTextareaRemark.val().trim();
+        $.ajax({
+           url: handleUrl,
+           type: "post",
+           async: true,
+           data: data,
+           dataType: "json",
+           timeout: "3000",
+           error: function () {
+                myAlert("网络异常，请确定网络正常！","error");
+           },
+           success: function (res) {
+               if(1000 === res.code){
+                    myAlert(res.msg,"success");
+
+               }else{
+                    myAlert(res.msg,"error");
+               }
+           }
+        });
+
+    });
+    eleBtnAnalyVideoAdd.click(function () {
+        analyzerControlHandle('add',controlCode);
+    });
+    eleBtnAnalyVideoCancel.click(function () {
+        analyzerControlHandle('cancel',controlCode);
+    });
+    function analyzerControlHandle(handle,code) {
+        let handleUrl;
+        if ('add'===handle){
+            handleUrl = '/analyzerControlAdd';
+        }else if('cancel'===handle){
+            handleUrl = '/analyzerControlCancel';
+        }else{
+            return;
+        }
+        $.ajax({
+           url: handleUrl,
+           type: "post",
+           async: true,
+           data: {"controlCode":code},
+           dataType: "json",
+           timeout: "3000",
+           error: function () {
+                myAlert("网络异常，请确定网络正常！","error");
+           },
+           success: function (res) {
+               if(1000 === res.code){
+                    myAlert(res.msg,"success");
+
+               }else{
+                    myAlert(res.msg,"error");
+               }
+           }
+        });
+    }
+    function play(flvUrl){
+
+
+        if(!flvjs.isSupported()){
+            myAlert("浏览器不支持flv.js！","error");
+            return;
+        }
+        if(typeof flvUrl === "undefined" || !flvUrl.endsWith(".flv")){
+            myAlert("播放地址格式不正确！","error");
+            return;
+        }
+
+
+        let mediaDataSource = {
+            type: 'flv',
+            enableStashBuffer:true,
+            isLive:true,
+            withCredentials:false,
+            hasAudio:true,
+            hasVideo:true,
+            url:flvUrl
+        };
+        //console.log('MediaDataSource', mediaDataSource);
+        //eleFlvPlayer.setAttribute('poster',"/static/images/media.jpg")
+
+        if (typeof player !== "undefined") {
+            if (player != null) {
+                player.unload();
+                player.detachMediaElement();
+                player.destroy();
+                player = null;
+            }
+        }
+        player = flvjs.createPlayer(mediaDataSource, {
+            enableWorker: false,
+            lazyLoadMaxDuration: 3 * 60,
+            seekType: 'range',
+        });
+        player.attachMediaElement(eleFlvPlayer);
+        player.load();
+        player.play();
+    }
+    function stop(){
+        if (typeof player === "undefined" || player === null) {
+            myAlert("播放器暂未启动！","error");
+            return;
+        }
+        player.pause();
+        player.unload();
+        player.detachMediaElement();
+        player.destroy();
+        player = null;
+
+    }
+
+</script>
+
+{% endblock javascripts %}

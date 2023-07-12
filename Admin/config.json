@@ -1,0 +1,7 @@
+{
+    "mediaApiHost"  : "http://127.0.0.1:80",
+    "mediaHttpHost" : "http://127.0.0.1:80",
+    "mediaRtmpHost" : "rtmp://127.0.0.1:1935",
+    "mediaRtspHost" : "rtmp://127.0.0.1:554",
+    "analyzerApiHost" : "http://127.0.0.1:9002"
+}

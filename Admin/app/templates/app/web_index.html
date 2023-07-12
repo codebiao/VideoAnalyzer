@@ -1,0 +1,419 @@
+{% extends "app/base_site.html" %}
+
+{% block title %} 控制面板 {% endblock title %}
+
+{% block stylesheets %}
+  {{ block.super }}
+{% endblock stylesheets %}
+
+{% block content %}
+  <div class="right_col" role="main">
+
+    <!-- top tiles -->
+    <div class="row tile_count">
+      <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+        <span class="count_top"><i class="fa fa-video-camera"></i> 视频总数 </span>
+        <div class="count">0</div>
+        <span class="count_bottom"><i class="green">4% </i> From last Week</span>
+      </div>
+      <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+        <span class="count_top"><i class="fa fa-shield"></i> 报警总数 </span>
+        <div class="count">0</div>
+        <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>3% </i> From last Week</span>
+      </div>
+      <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+        <span class="count_top"><i class="fa fa-user"></i> Total Males</span>
+        <div class="count green">0</div>
+        <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+      </div>
+      <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+        <span class="count_top"><i class="fa fa-user"></i> Total Females</span>
+        <div class="count">0</div>
+        <span class="count_bottom"><i class="red"><i class="fa fa-sort-desc"></i>12% </i> From last Week</span>
+      </div>
+      <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+        <span class="count_top"><i class="fa fa-user"></i> Total Collections</span>
+        <div class="count">0</div>
+        <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+      </div>
+      <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+        <span class="count_top"><i class="fa fa-user"></i> Total Connections</span>
+        <div class="count">0</div>
+        <span class="count_bottom"><i class="green"><i class="fa fa-sort-asc"></i>34% </i> From last Week</span>
+      </div>
+    </div>
+    <!-- /top tiles -->
+    <br />
+
+    <div class="row">
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>CPU利用率</h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div id="cpuCharts" style="height:220px"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>内存利用率</h2>
+
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div id="memoryCharts" style="height:220px"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>存储利用率</h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div id="diskCharts" style="height:220px"></div>
+            </div>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+                <h2>视频行为分析系统</h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <table class="table table-hover">
+                <tbody>
+                  <tr>
+                    <th scope="row">流媒体</th>
+                    <th scope="row">正常运行10小时</th>
+                  </tr>
+                  <tr>
+                   <th scope="row">分析</th>
+                    <th scope="row">正常</th>
+                  </tr>
+                   <tr>
+                    <th scope="row">算法</th>
+                    <th scope="row">正常</th>
+                  </tr>
+                   <tr>
+                    <th scope="row">存储</th>
+                    <th scope="row">正常</th>
+                  </tr>
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+                <h2>系统信息</h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <table class="table table-hover">
+                <tbody>
+                  <tr>
+                    <th scope="row">运行</th>
+                    <th scope="row" id="os_run_date_str">00:00:00</th>
+                  </tr>
+                    <tr>
+                    <th scope="row">CPU</th>
+                    <th scope="row" id="os_cpu_used_rate">0%</th>
+                  </tr>
+
+                  <tr>
+                    <th scope="row">内存</th>
+                    <th scope="row" id="os_virtual_mem_used_rate">0%</th>
+                  </tr>
+
+                   <tr>
+                    <th scope="row">存储</th>
+                    <th scope="row" id="os_disk_used_rate">0%</th>
+                  </tr>
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+                <h2>其他信息</h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <table class="table table-hover">
+                <tbody>
+                   <tr>
+                    <th scope="row">是否激活</th>
+                    <th scope="row">否</th>
+                  </tr>
+
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="clearfix"></div>
+
+    </div>
+
+
+  </div>
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super}}
+
+  <script src="/static/lib/highcharts/highcharts.js"></script>
+  <script src="/static/lib/highcharts/modules/exporting.js"></script>
+  <script src="/static/lib/highcharts-plugins/highcharts-zh_CN.js"></script>
+
+
+    <script>
+
+    Highcharts.setOptions({
+            global: {
+                    useUTC: false
+            }
+    });
+    function activeLastPointToolip(chart) {
+        let points = chart.series[0].points;
+        chart.tooltip.refresh(points[points.length -1]);
+    }
+    let cpuCharts = Highcharts.chart('cpuCharts', {
+		chart: {
+				type: 'spline',
+				marginRight: 10,
+				events: {
+                    load: function () {
+                        let chart = this;
+                        activeLastPointToolip(chart);
+                    }
+				}
+		},
+		title: {
+				text: null
+		},
+		xAxis: {
+				type: 'datetime',
+				tickPixelInterval: 150
+		},
+		 yAxis: [{
+            min:0,
+            title: {
+                text: null
+            },
+            showFirstLabel: true
+        }],
+		tooltip: {
+				formatter: function () {
+						return '<b>' + this.series.name + '</b><br/>' +
+								Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+								Highcharts.numberFormat(this.y, 2);
+
+
+				}
+		},
+		legend: {
+				enabled: false
+		},
+		series: [{
+				name: 'CPU利用率',
+				data: (function () {
+						// 生成随机值
+						var data = [],
+								time = (new Date()).getTime(),
+								i;
+						for (i = -9; i <= 0; i += 1) {
+								data.push({
+										x: time + i * 1000,
+										y: 0 //Math.random()
+								});
+						}
+
+						return data;
+				}())
+		}]
+    });
+    let memoryCharts = Highcharts.chart('memoryCharts', {
+		chart: {
+				type: 'spline',
+				marginRight: 10,
+				events: {
+                    load: function () {
+                        let chart = this;
+                        activeLastPointToolip(chart);
+                    }
+				}
+		},
+		title: {
+		    text: null
+		},
+		xAxis: {
+				type: 'datetime',
+				tickPixelInterval: 150
+		},
+		 yAxis: [{ // 第一个 Y 轴，放置在左边（默认在坐标）
+            title: {
+                text: null
+            },
+            showFirstLabel: true
+        }],
+		tooltip: {
+				formatter: function () {
+						return '<b>' + this.series.name + '</b><br/>' +
+								Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+								Highcharts.numberFormat(this.y, 2);
+				}
+		},
+		legend: {
+				enabled: false
+		},
+		series: [{
+				name: '内存利用率',
+				data: (function () {
+						// 生成随机值
+						var data = [],
+								time = (new Date()).getTime(),
+								i;
+						for (i = -9; i <= 0; i += 1) {
+								data.push({
+										x: time + i * 1000,
+										y: 0 //Math.random()
+								});
+						}
+
+						return data;
+				}())
+		}]
+    });
+    let diskCharts = Highcharts.chart('diskCharts', {
+		chart: {
+				type: 'spline',
+				marginRight: 10,
+				events: {
+                    load: function () {
+                        let chart = this;
+                        activeLastPointToolip(chart);
+                    }
+				}
+		},
+		title: {
+				text: null
+		},
+		xAxis: {
+				type: 'datetime',
+				tickPixelInterval: 150
+		},
+		 yAxis: [{
+            min:0,
+            title: {
+                text: null
+            },
+            showFirstLabel: true
+        }],
+		tooltip: {
+				formatter: function () {
+						return '<b>' + this.series.name + '</b><br/>' +
+								Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+								Highcharts.numberFormat(this.y, 2);
+
+
+				}
+		},
+		legend: {
+				enabled: false
+		},
+		series: [{
+				name: '磁盘利用率',
+				data: (function () {
+						// 生成随机值
+						var data = [],
+								time = (new Date()).getTime(),
+								i;
+						for (i = -9; i <= 0; i += 1) {
+								data.push({
+										x: time + i * 1000,
+										y: 0 //Math.random()
+								});
+						}
+
+						return data;
+				}())
+		}]
+    });
+
+
+    function dataUpdater() {
+        $.ajax({
+           url: '/getIndex',
+           type: "get",
+           async: true,
+           data: {},
+           dataType: "json",
+           timeout: "3000",
+           error: function () {
+                myAlert("网络异常，请确定网络正常！","error");
+           },
+           success: function (res) {
+               if(1000 === res.code){
+
+                    let os_info = res["os_info"];
+                    let os_cpu_used_rate = os_info["os_cpu_used_rate"];
+                    let os_virtual_mem_used_rate = os_info["os_virtual_mem_used_rate"];
+                    let os_disk_used_rate = os_info["os_disk_used_rate"];
+
+                    let os_cpu_used_rate_str = os_info["os_cpu_used_rate_str"];
+                    let os_virtual_mem_used_rate_str = os_info["os_virtual_mem_used_rate_str"];
+                    let os_disk_used_rate_str = os_info["os_disk_used_rate_str"];
+
+                    let os_run_date_str = os_info["os_run_date_str"];
+
+                    $("#os_run_date_str").html(os_run_date_str);
+                    $("#os_cpu_used_rate").html(os_cpu_used_rate_str);
+                    $("#os_virtual_mem_used_rate").html(os_virtual_mem_used_rate_str);
+                    $("#os_disk_used_rate ").html(os_disk_used_rate_str);
+
+
+                    let x = (new Date()).getTime();
+
+                    cpuCharts.series[0].addPoint([x, os_cpu_used_rate], true, true);
+                    activeLastPointToolip(cpuCharts);
+                    memoryCharts.series[0].addPoint([x, os_virtual_mem_used_rate], true, true);
+                    activeLastPointToolip(memoryCharts);
+                    diskCharts.series[0].addPoint([x, os_disk_used_rate], true, true);
+                    activeLastPointToolip(diskCharts);
+
+                    setTimeout(function () {
+                        dataUpdater();
+                    }, 3000);
+
+               }else{
+                    myAlert(res.msg,"error");
+               }
+           }
+        });
+    }
+
+    window.onload = function (){
+        dataUpdater();
+    };
+
+
+</script>
+{% endblock javascripts %}
+
